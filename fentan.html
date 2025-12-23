@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>积分比例分摊计算器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 13px;
+        }
+
+        .content {
+            padding: 15px;
+        }
+
+        .input-section {
+            margin-bottom: 15px;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #4facfe;
+        }
+
+        .participants-section {
+            margin-bottom: 15px;
+        }
+
+        .participant-input {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 8px;
+            align-items: center;
+            position: relative;
+        }
+
+        .participant-input input[type="text"] {
+            flex: 0 0 30%;
+            padding: 6px 8px;
+            font-size: 13px;
+            min-width: 0;
+        }
+
+        .participant-input input[type="number"] {
+            flex: 1;
+            padding: 6px 8px;
+            font-size: 13px;
+            min-width: 0;
+        }
+
+        .btn-remove {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 6px 8px;
+            min-width: 24px;
+            height: 28px;
+            flex: 0 0 auto;
+        }
+
+        .btn-remove:hover {
+            background: #c82333;
+        }
+
+        .btn-add {
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 6px 10px;
+            height: 28px;
+            width: 100%;
+        }
+
+        .btn-add:hover {
+            background: #218838;
+        }
+
+        .btn-calculate {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            margin-bottom: 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .btn-calculate:hover {
+            opacity: 0.9;
+        }
+
+        .results {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 15px;
+        }
+
+        .results h3 {
+            color: #333;
+            margin-bottom: 12px;
+            font-size: 15px;
+        }
+
+        .result-item {
+            background: white;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-left: 3px solid #4facfe;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .result-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .person-name {
+            font-weight: bold;
+            color: #333;
+            font-size: 13px;
+            margin-bottom: 3px;
+        }
+
+        .person-info {
+            color: #666;
+            font-size: 11px;
+            margin-bottom: 5px;
+            line-height: 1.3;
+        }
+
+        .person-share {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .share-amount {
+            font-size: 14px;
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        .share-after-amount {
+            font-size: 14px;
+            font-weight: bold;
+            color: #ff571a;
+        }
+
+        .share-percentage {
+            font-size: 11px;
+            color: #666;
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+
+        .total-row {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-left: none;
+        }
+
+        .total-row .person-name,
+        .total-row .person-info {
+            color: white;
+        }
+
+        .total-row .share-amount {
+            color: white;
+        }
+
+        .total-row .share-percentage {
+            color: white;
+            background: rgba(255,255,255,0.2);
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 12px;
+            border: 1px solid #f5c6cb;
+            font-size: 13px;
+        }
+
+        @media (max-width: 480px) {
+            .participant-input {
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+            
+            .participant-input input[type="text"] {
+                flex: 0 0 calc(30% - 5px);
+                min-width: 0;
+            }
+            
+            .participant-input input[type="number"] {
+                flex: 0 0 calc(70% - 40px);
+                min-width: 0;
+            }
+            
+            .btn-remove {
+                position: absolute;
+                right: 0;
+                top: 0;
+                height: 28px;
+            }
+            
+            .container {
+                border-radius: 0;
+            }
+            
+            .header {
+                padding: 12px;
+            }
+            
+            .content {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 积分比例分摊计算器</h1>
+            <p>根据积分比例公平分摊费用</p>
+        </div>
+        
+        <div class="content">
+            <div class="input-section">
+                <div class="input-group">
+                    <label for="totalAmount">总金额</label>
+                    <input type="number" id="totalAmount" placeholder="例：100" step="0.01" min="0">
+                </div>
+            </div>
+
+            <div class="participants-section">
+                <div class="input-group">
+                    <label>参与人员及积分</label>
+                    <div id="participantsContainer">
+                        <div class="participant-input">
+                            <input type="text" placeholder="姓名" class="person-name-input" maxlength="6">
+                            <input type="number" placeholder="积分" class="person-points-input" min="0" step="1" value="0">
+                            <button type="button" class="btn-remove" onclick="removeParticipant(this)" title="删除">×</button>
+                        </div>
+                        <div class="participant-input">
+                            <input type="text" placeholder="姓名" class="person-name-input" maxlength="6">
+                            <input type="number" placeholder="积分" class="person-points-input" min="0" step="1" value="0">
+                            <button type="button" class="btn-remove" onclick="removeParticipant(this)" title="删除">×</button>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-add" onclick="addParticipant()">+添加</button>
+                </div>
+            </div>
+
+            <button type="button" class="btn-calculate" onclick="calculateShares()">计算分摊</button>
+
+            <div id="results"></div>
+        </div>
+    </div>
+
+    <script>
+        let participantCount = 2;
+
+        function addParticipant() {
+            const container = document.getElementById('participantsContainer');
+            const div = document.createElement('div');
+            div.className = 'participant-input';
+            div.innerHTML = `
+                <input type="text" placeholder="姓名" class="person-name-input" maxlength="6">
+                <input type="number" placeholder="积分" class="person-points-input" min="0" step="1" value="0">
+                <button type="button" class="btn-remove" onclick="removeParticipant(this)" title="删除">×</button>
+            `;
+            container.appendChild(div);
+            participantCount++;
+        }
+
+        function removeParticipant(button) {
+            const container = document.getElementById('participantsContainer');
+            if (container.children.length > 1) {
+                button.parentElement.remove();
+            } else {
+                alert('至少保留一个参与者！');
+            }
+        }
+
+        function calculateShares() {
+            const totalAmountInput = document.getElementById('totalAmount');
+            const totalAmount = parseFloat(totalAmountInput.value);
+
+            const participants = [];
+            const originalParticipants = [];
+            const participantInputs = document.querySelectorAll('.participant-input');
+            let hasError = false;
+            let errorMessage = '';
+
+            if (!totalAmount || totalAmount <= 0) {
+                hasError = true;
+                errorMessage += '请输入有效的总金额\n';
+            }
+
+            participantInputs.forEach((inputDiv, index) => {
+                const nameInput = inputDiv.querySelector('.person-name-input');
+                const pointsInput = inputDiv.querySelector('.person-points-input');
+                
+                const name = nameInput.value.trim();
+                const points = parseInt(pointsInput.value) || 0;
+
+                originalParticipants.push({
+                    name: name || '未命名',
+                    points: points
+                });
+
+                if (points > 0) {
+                    participants.push({
+                        name: name || '未命名',
+                        points: points,
+                        originalPoints: points
+                    });
+                }
+            });
+
+            if (hasError) {
+                showError(errorMessage);
+                return;
+            }
+
+            const allPointsZero = participants.every(p => p.points === 0);
+            if (allPointsZero) {
+                showError('所有参与者积分都为0，无法分配！');
+                return;
+            }
+
+            const totalPoints = participants.reduce((sum, p) => sum + p.points, 0);
+            const results = participants.map(p => {
+                const percentage = (p.points / totalPoints * 100).toFixed(1);
+                const share = Math.ceil(totalAmount * p.points / totalPoints);
+                const newPoints = p.originalPoints - share;
+                
+                return {
+                    ...p,
+                    percentage: percentage,
+                    share: share,
+                    newPoints: newPoints
+                };
+            });
+
+            displayResults(totalAmount, results, originalParticipants);
+        }
+
+        function displayResults(totalAmount, results, originalParticipants) {
+            const resultsDiv = document.getElementById('results');
+            
+            let html = '<div class="results">';
+            html += '<h3>分摊结果</h3>';
+
+            results.forEach(result => {
+                html += `
+                    <div class="result-item">
+                        <div class="person-name">${result.name}</div>
+                        <div class="person-info">
+                            原积分：${result.originalPoints}  |  
+                            占比：${result.percentage}% 
+                        </div>
+                        <div class="person-share">
+                            <span class="share-amount">¥${result.share}</span>
+                            <span class="share-after-amount">分摊后积分：¥${result.newPoints}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            const totalShare = results.reduce((sum, r) => sum + r.share, 0);
+            const totalOriginalPoints = originalParticipants.reduce((sum, p) => sum + p.points, 0);
+            
+            html += `
+                <div class="result-item total-row">
+                    <div class="person-name">合计</div>
+                    <div class="person-info">
+                        总原积分：${totalOriginalPoints} | 
+                        100% | 
+                        总分摊金额：¥${totalShare}
+                    </div>
+                    <div class="person-share">
+                        <span class="share-amount">¥${totalShare}</span>
+                        <span class="share-percentage">100%</span>
+                    </div>
+                </div>
+            `;
+
+            html += '</div>';
+            resultsDiv.innerHTML = html;
+        }
+
+        function showError(message) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `<div class="error">错误：${message.replace(/\n/g, '<br>')}</div>`;
+        }
+
+        window.onload = function() {
+            document.getElementById('totalAmount').focus();
+        };
+    </script>
+</body>
+</html>
